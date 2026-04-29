@@ -144,7 +144,5 @@ depois que o build finalizar sem erro, execute o proximo comando.
             "pathMappings": {
                 "/var/www/": "${workspaceFolder}"
             }
-    },
-
-4- Seja feliz!!
+    }
 ```

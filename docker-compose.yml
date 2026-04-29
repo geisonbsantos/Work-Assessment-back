@@ -9,8 +9,8 @@ services:
                 uid: 1000 # UID do usuário do host (deve corresponder ao seu UID)
             context: ./ # Diretório onde está o Dockerfile
             dockerfile: Dockerfile # Nome do arquivo Dockerfile
-        image: starter-pack-app # Nome da imagem Docker gerada
-        container_name: starter-pack-api # Nome do container
+        image: work-assessment-back-app # Nome da imagem Docker gerada
+        container_name: work-assessment-back-api # Nome do container
         restart: unless-stopped # Reinicia automaticamente (exceto se parado manualmente)
         working_dir: /var/www/ # Diretório de trabalho dentro do container
         user: "1000:1000" # Executa como usuário/grupo com UID 1000
@@ -24,12 +24,12 @@ services:
             - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini # Configurações Xdebug personalizadas
         # Rede customizada para comunicação entre containers
         networks:
-            - starter-pack
+            - work-assessment-back
 
     # Serviço do nginx para servir a aplicação
     nginx:
         image: nginx:alpine
-        container_name: starter-pack-nginx
+        container_name: work-assessment-back-nginx
         restart: unless-stopped
         ports:
             - 9080:80 # Acessa aplicação em http://localhost:9080
@@ -39,9 +39,9 @@ services:
         depends_on:
             - app
         networks:
-            - starter-pack
+            - work-assessment-back
 
 # Define redes customizadas para comunicação entre containers
 networks:
-    starter-pack: # Nome da rede
+    work-assessment-back: # Nome da rede
         driver: bridge # Driver de rede (padrão para containers na mesma máquina)

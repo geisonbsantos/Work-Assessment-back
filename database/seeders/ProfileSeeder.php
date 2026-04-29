@@ -18,9 +18,16 @@ class ProfileSeeder extends Seeder
     {
         $profiles = [
             [
-                'name' => 'ADMINISTRADOR',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'name' => 'ADMINISTRADOR'
+            ],
+            [
+                'name' => 'LÍDER TÉCNICO'
+            ],
+            [
+                'name' => 'TRABALHADOR'
+            ],
+            [
+                'name' => 'CHEFE MEDIATO'
             ],
         ];
         foreach ($profiles as $value) {

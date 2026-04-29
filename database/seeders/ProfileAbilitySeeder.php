@@ -26,6 +26,19 @@ class ProfileAbilitySeeder extends Seeder
                 'profile_id' => 1,
                 'ability_id' => $idAbility->id,
             ]);
+            ProfileAbility::firstOrCreate([
+                'profile_id' => 2,
+                'ability_id' => $idAbility->id,
+            ]);
+            ProfileAbility::firstOrCreate([
+                'profile_id' => 3,
+                'ability_id' => $idAbility->id,
+            ]);
+            ProfileAbility::firstOrCreate([
+                'profile_id' => 4,
+                'ability_id' => $idAbility->id,
+            ]);
+
         }
     }
 }

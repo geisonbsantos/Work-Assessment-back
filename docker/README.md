@@ -126,7 +126,7 @@ docker system prune -a
 ## 🌐 Acesso à Aplicação
 
 - **URL da aplicação**: http://localhost:9090
-- **Container**: starter-pack-app
+- **Container**: work-assessment-back-app
 - **Serviço**: app
 - **Porta**: 9090
 
