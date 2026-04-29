@@ -1,0 +1,71 @@
+<?php
+
+use App\Models\{{ model }};
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Testing\Fluent\AssertableJson;
+
+beforeEach(function () {
+    DB::beginTransaction();
+    $this->token = User::factory()
+        ->create([
+            'cpf' => fake()->unique()->numerify('###########'),
+            'email' => fake()->unique()->safeEmail(),
+        ])
+        ->createToken('auth_token')
+        ->plainTextToken;
+});
+
+// Unauthorized tests
+it('should {{ model }} POST endpoint throw an unauthorized status', function () {
+    $data = {{ model }}::factory()->make()->toArray();
+    $this->postJson('/api/{{ route }}', $data)->assertUnauthorized();
+});
+
+it('should {{ model }} PUT endpoint throw an unauthorized status', function () {
+    $data = {{ model }}::factory()->make()->toArray();
+    $this->putJson('/api/{{ route }}/1', $data)->assertUnauthorized();
+});
+
+it('should {{ model }} DELETE endpoint throw an unauthorized status', function () {
+    ${{ variable }} = {{ model }}::factory()->create();
+    $this->deleteJson('/api/{{ route }}/' . ${{ variable }}->id)->assertUnauthorized();
+});
+
+// Authorized tests
+it('should {{ model }} GET endpoint return all items', function () {
+    ${{ variable }} = {{ model }}::factory()->create();
+    $response = $this->getJson('/api/{{ route }}', ['Authorization' => 'Bearer ' . $this->token])
+        ->assertOk();
+
+    $response->assertJson(fn(AssertableJson $json) => $json->has('data')->etc());
+});
+
+it('should {{ model }} GET endpoint return a single item', function () {
+    ${{ variable }} = {{ model }}::factory()->create();
+    $response = $this->getJson('/api/{{ route }}/' . ${{ variable }}->id, ['Authorization' => 'Bearer ' . $this->token])
+        ->assertOk();
+
+    $response->assertJson(fn(AssertableJson $json) => $json->has('id')->etc());
+});
+
+it('should {{ model }} POST endpoint create a new item', function () {
+    $data = {{ model }}::factory()->make()->toArray();
+    $this->postJson('/api/{{ route }}', $data, ['Authorization' => 'Bearer ' . $this->token])
+        ->assertCreated()
+        ->assertJson(fn(AssertableJson $json) => $json->whereAll(['message' => 'Registro inserido com sucesso.'])->etc());
+});
+
+it('should {{ model }} PUT endpoint update an item', function () {
+    ${{ variable }} = {{ model }}::factory()->create();
+    $data = {{ model }}::factory()->make()->toArray();
+
+    $this->putJson('/api/{{ route }}/' . ${{ variable }}->id, $data, ['Authorization' => 'Bearer ' . $this->token])
+        ->assertOk()
+        ->assertJson(fn(AssertableJson $json) => $json->whereAll(['message' => 'Registro atualizado com sucesso.'])->etc());
+});
+
+afterEach(function () {
+    DB::rollBack();
+});

@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Services;
+
+use App\Repositories\Core\{{ class }}Repository;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class {{ class }}Service
+{
+    public function __construct(
+        private {{ class }}Repository $repository
+    ) {}
+
+    public function getAll()
+    {
+        return $this->repository->getAll();
+    }
+
+    public function paginate(int $totalPage): LengthAwarePaginator
+    {
+        return $this->repository->paginate($totalPage);
+    }
+
+    public function findById(int $id)
+    {
+        return $this->repository->findById($id);
+    }
+
+    public function store(array $data): void
+    {
+        $this->repository->store($data);
+    }
+
+    public function update(array $data, int $id): void
+    {
+        $entity = $this->findById($id);
+        $this->repository->update($entity, $data);
+    }
+
+    public function destroy(int $id): void
+    {
+        $entity = $this->findById($id);
+        $this->repository->destroy($entity);
+    }
+
+    public function restore(int $id)
+    {
+        $this->repository->restore($id);
+    }
+}

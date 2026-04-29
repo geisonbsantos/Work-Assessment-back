@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Repositories\Core;
+
+use App\Models\{{ class }};
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class {{ class }}Repository extends BaseRepository
+{
+    public function __construct(private {{ class }} $entity)
+    {
+        parent::__construct($entity);
+    }
+
+    public function getAll(): Collection
+    {
+        return $this->entity->get();
+    }
+
+    public function findById(int $id): object
+    {
+        return $this->entity->findOrFail($id);
+    }
+
+    public function paginate(int $totalPage): LengthAwarePaginator
+    {
+        return $this->entity->paginate($totalPage);
+    }
+}
