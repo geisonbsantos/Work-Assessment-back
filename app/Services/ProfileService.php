@@ -11,7 +11,12 @@ use App\Repositories\Core\ProfileRepository;
 
 class ProfileService implements ProfileInterface
 {
-    public function __construct(private ProfileRepository $repository) {}
+    private ProfileRepository $repository;
+
+    public function __construct(ProfileRepository $repository)
+    {
+        $this->repository = $repository;
+    }
 
     public function getAll(): ProfileCollection
     {

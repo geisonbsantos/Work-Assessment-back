@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\Hash;
 
 class UserRepository extends BaseRepository
 {
-    public function __construct(private User $entity)
+    private $entity;
+    public function __construct(User $entity)
     {
         parent::__construct($entity);
+        $this->entity = $entity;
     }
 
     public function getAll(): Collection
@@ -65,7 +67,7 @@ class UserRepository extends BaseRepository
                 }
             }
         }
-        $page = ($item === 'per_pege') ? $page = $value : $page = 10;
+        $page = $items['per_page'] ?? 10;
 
         return $query->orderBy('name')->paginate($page);
     }

@@ -12,10 +12,16 @@ use Illuminate\Support\Str;
 
 class ForgotPasswordService implements ForgotPasswordInterface
 {
+    private PasswordResetRepository $repository;
+    private UserService $userService;
+
     public function __construct(
-        private PasswordResetRepository $repository,
-        private UserService $userService
-    ) {}
+        PasswordResetRepository $repository,
+        UserService $userService
+    ) {
+        $this->repository = $repository;
+        $this->userService = $userService;
+    }
 
     public function sendEmail(array $request): void
     {

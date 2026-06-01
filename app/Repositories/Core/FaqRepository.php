@@ -9,9 +9,12 @@ use Yajra\Pdo\Oci8\Exceptions\Oci8Exception;
 
 class FaqRepository extends BaseRepository
 {
-    public function __construct(private Faq $entity)
+    private Faq $entity;
+
+    public function __construct(Faq $entity)
     {
         parent::__construct($entity);
+        $this->entity = $entity;
     }
 
     public function store(array $data): void
