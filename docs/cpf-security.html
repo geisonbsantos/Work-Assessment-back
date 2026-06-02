@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Documentação — Melhoria de Segurança do CPF</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#222;margin:24px}
+    h1,h2{color:#0b3d91}
+    pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow:auto}
+    code{background:#eef;padding:2px 4px;border-radius:4px}
+    .files li{margin:6px 0}
+    .note{background:#fff3cd;padding:10px;border-left:4px solid #ffe08a}
+  </style>
+</head>
+<body>
+  <h1>Melhoria de Segurança — CPF</h1>
+
+  <p>Data: 2026-06-02<br>Autor: alterações aplicadas no branch <strong>feat/Encrypt_CPF</strong></p>
+
+  <h2>Resumo</h2>
+  <p>O CPF deixou de ser mantido e pesquisado como texto simples. Agora:</p>
+  <ul>
+    <li>O valor do CPF é armazenado encriptado at-rest usando o cast <code>encrypted</code> do Laravel.</li>
+    <li>Foi adicionado um campo <code>cpf_hash</code> (SHA-256) para buscas/validações sem expor o CPF cru.</li>
+    <li>A API passa a mascarar o CPF retornado em responses.</li>
+    <li>Logs e mensagens deixaram de gravar o CPF em texto claro; usam identificadores como <code>id</code>.</li>
+  </ul>
+
+  <h2>Arquivos alterados</h2>
+  <ul class="files">
+    <li><strong>Model:</strong> <a href="app/Models/User.php">app/Models/User.php</a> — adiciona cast encrypted e setter que gera <code>cpf_hash</code>.</li>
+    <li><strong>Migração:</strong> <a href="database/migrations/2026_06_02_000001_add_cpf_hash_to_users_table.php">database/migrations/2026_06_02_000001_add_cpf_hash_to_users_table.php</a> — cria <code>cpf_hash</code>, encripta valores existentes e atualiza dados.</li>
+    <li><strong>Service:</strong> <a href="app/Services/UserService.php">app/Services/UserService.php</a> — busca por <code>cpf_hash</code> no login e remove CPF cru de logs.</li>
+    <li><strong>Resource:</strong> <a href="app/Http/Resources/UserResource.php">app/Http/Resources/UserResource.php</a> — máscara do CPF nas respostas da API.</li>
+    <li><strong>Requests:</strong> <a href="app/Http/Requests/StoreUpdateUserFormRequest.php">app/Http/Requests/StoreUpdateUserFormRequest.php</a> e <a href="app/Http/Requests/ReportErrorFormRequest.php">app/Http/Requests/ReportErrorFormRequest.php</a> — geram e validam <code>cpf_hash</code> para unique/exists.</li>
+  </ul>
+
+  <h2>Migração e execução (passos)</h2>
+  <ol>
+    <li>Garanta backup do banco antes de rodar em produção.</li>
+    <li>Em ambiente de desenvolvimento com Docker (exemplo):
+      <pre><code>docker compose exec php bash
+php artisan migrate</code></pre>
+    </li>
+    <li>Se usar sqlite (testes locais), a migração ajustou o campo para <code>nullable</code> para evitar erro de adição de coluna NOT NULL.</li>
+  </ol>
+
+  <h2>Rollback</h2>
+  <p>Para reverter a migração:</p>
+  <pre><code>php artisan migrate:rollback --step=1</code></pre>
+  <p>Observação: o <code>down()</code> da migração tenta restaurar a constraint única no campo <code>cpf</code>, mas é recomendável testar o rollback em staging antes de produção.</p>
+
+  <h2>Considerações de segurança</h2>
+  <ul>
+    <li>As encriptações utilizam as chaves do Laravel (<code>APP_KEY</code>). Planeje políticas de rotação de chave com cuidado — rotacionar a <code>APP_KEY</code> sem strategy de re-encrypt pode tornar os dados inacessíveis.</li>
+    <li>O <code>cpf_hash</code> é determinístico (SHA-256) e permite busca; isso é suficiente para funções de lookup, mas não substitui controles de acesso e auditoria.</li>
+    <li>Evite expor o CPF completo em logs, emails ou templates HTML. A notificação de relatório de erro foi ajustada para mostrar CPF mascarado quando enviada.</li>
+    <li>Restrinja quem pode ler campos encriptados: usuários com privilégios financeiros ou de suporte precisam de aprovação e registro de acesso.</li>
+  </ul>
+
+  <h2>Impactos e limitações</h2>
+  <ul>
+    <li>Não é possível pesquisar diretamente por CPF em índices sem primeiro fazer o hash — pesquise usando o mesmo algoritmo (remover não dígitos + SHA-256).</li>
+    <li>Consultas que antes usavam <code>where('cpf', $value)</code> foram alteradas para <code>where('cpf_hash', hash('sha256', $cpf))</code>.</li>
+    <li>Operações de full-text ou filtros que esperavam CPF no formato original deverão ser revisadas.</li>
+  </ul>
+
+  <h2>Testes recomendados</h2>
+  <ol>
+    <li>Rodar suíte de testes automatizados.</li>
+    <li>Adicionar testes que verifiquem:
+      <ul>
+        <li>Cadastro cria <code>cpf_hash</code> corretamente e armazena CPF encriptado.</li>
+        <li>Login funciona quando busca por CPF fornecido (pré-processado).</li>
+        <li>APIs retornam CPF mascarado.</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h2>Checklist pós-migração</h2>
+  <ul>
+    <li>Verificar integridade dos dados (ex.: contagem de usuários e hashes gerados).</li>
+    <li>Testar fluxos de login, reset de senha e relatórios que usam CPF.</li>
+    <li>Confirmar que logs não contêm CPFs em texto claro.</li>
+  </ul>
+
+  <h2>Links rápidos</h2>
+  <ul>
+    <li><a href="app/Models/User.php">app/Models/User.php</a></li>
+    <li><a href="database/migrations/2026_06_02_000001_add_cpf_hash_to_users_table.php">Migração: add_cpf_hash_to_users_table</a></li>
+    <li><a href="app/Http/Resources/UserResource.php">app/Http/Resources/UserResource.php</a></li>
+    <li><a href="app/Services/UserService.php">app/Services/UserService.php</a></li>
+  </ul>
+
+  <p class="note">Observação: revisar políticas de chave e backups antes de executar em produção.</p>
+
+</body>
+</html>
