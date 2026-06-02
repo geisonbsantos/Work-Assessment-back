@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class StoreUpdateUserFormRequest extends FormRequest
 {
@@ -18,6 +19,16 @@ class StoreUpdateUserFormRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('cpf')) {
+            $cpf = preg_replace('/\D/', '', $this->input('cpf'));
+            $this->merge(['cpf_hash' => hash('sha256', $cpf)]);
+        }
+
+        return;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,13 +38,20 @@ class StoreUpdateUserFormRequest extends FormRequest
     {
         $rules = [
             'name' => 'required|max:255|string',
-            'cpf' => 'required|unique:users,cpf|cpf',
+            'cpf' => 'required|cpf',
+            'cpf_hash' => [
+                'required',
+                Rule::unique('users', 'cpf_hash'),
+            ],
             'email' => 'required|unique:users,email|min:3|max:255|email',
             'profile_id' => 'required|exists:profiles,id',
         ];
 
         if (in_array($this->method(), ['PUT', 'PATCH'])) {
-            $rules['cpf'] = "required|unique:users,cpf,{$this->segment(3)},id|cpf";
+            $rules['cpf_hash'] = [
+                'required',
+                Rule::unique('users', 'cpf_hash')->ignore($this->segment(3), 'id'),
+            ];
             $rules['email'] = "required|unique:users,email,{$this->segment(3)},id|min:3|max:255|email";
         }
 

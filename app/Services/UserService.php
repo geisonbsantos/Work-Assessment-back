@@ -67,20 +67,22 @@ class UserService implements UserInterface
     {
         $user = $this->findById($id);
         $this->repository->update($user, $request);
-        $this->createCustomUserLog('Editou um usuário cpf: ' . $user->cpf . '.');
+        $this->createCustomUserLog('Editou um usuário id: ' . $user->id . '.');
     }
 
     public function destroy(int $id): void
     {
         $user = $this->findById($id);
-        $this->createCustomUserLog('Deletou um usuário cpf: ' . $user->cpf . '.');
+        $this->createCustomUserLog('Deletou um usuário id: ' . $user->id . '.');
         $this->repository->destroy($user);
         $user->tokens()->delete();
     }
 
     public function login(object $request): string
     {
-        $user = $this->repository->findWhereFirst('cpf', $request->cpf);
+        $cpf = preg_replace('/\D/', '', $request->cpf);
+        $cpfHash = hash('sha256', $cpf);
+        $user = $this->repository->findWhereFirst('cpf_hash', $cpfHash);
 
         if (! $user) {
             throw new CredentialsException($user);
@@ -90,7 +92,7 @@ class UserService implements UserInterface
             throw new UserException('Usuário desativado! Favor entrar em contato com a Administração.');
         }
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             throw new CredentialsException($user);
         }
         $user->tokens()->delete();

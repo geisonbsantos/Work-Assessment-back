@@ -44,11 +44,20 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'cpf' => 'encrypted',
     ];
 
     protected function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);
+    }
+
+    protected function setCpfAttribute($value)
+    {
+        $cpf = preg_replace('/\D/', '', $value);
+
+        $this->attributes['cpf_hash'] = hash('sha256', $cpf);
+        $this->attributes['cpf'] = $cpf;
     }
 
     public function setNameAttribute($value)

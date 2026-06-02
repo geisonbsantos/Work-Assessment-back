@@ -17,7 +17,7 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'cpf' => $this->cpf,
+            'cpf' => $this->maskCpf($this->cpf),
             'email' => $this->email,
             'profile' => $this->profile->name,
             'profile_id' => $this->profile_id,
@@ -26,5 +26,20 @@ class UserResource extends JsonResource
             'abilities' => $this->abilities,
             'abilitys' => $this->profile->abilitys,
         ];
+    }
+
+    private function maskCpf(?string $cpf): ?string
+    {
+        if (! $cpf) {
+            return null;
+        }
+
+        $cpf = preg_replace('/\D/', '', $cpf);
+
+        if (strlen($cpf) !== 11) {
+            return $cpf;
+        }
+
+        return sprintf('***.***.%s-%s', substr($cpf, 6, 3), substr($cpf, 9, 2));
     }
 }

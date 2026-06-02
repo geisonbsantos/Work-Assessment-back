@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ReportErrorFormRequest extends FormRequest
 {
@@ -18,6 +19,16 @@ class ReportErrorFormRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('cpf')) {
+            $cpf = preg_replace('/\D/', '', $this->input('cpf'));
+            $this->merge(['cpf_hash' => hash('sha256', $cpf)]);
+        }
+
+        return;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -28,7 +39,11 @@ class ReportErrorFormRequest extends FormRequest
         return [
             'description' => 'required|string',
             'subject' => 'required|string',
-            'cpf' => 'required|exists:users,cpf|cpf',
+            'cpf' => 'required|cpf',
+            'cpf_hash' => [
+                'required',
+                Rule::exists('users', 'cpf_hash'),
+            ],
             'email' => 'required|exists:users,email',
             'name' => 'required|string',
             'system' => 'required|string',
