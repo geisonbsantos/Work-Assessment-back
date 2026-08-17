@@ -46,6 +46,16 @@ RUN docker-php-ext-install mbstring exif pcntl bcmath
 # Obtém a versão mais recente do Composer (gerenciador de dependências PHP)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# ----------------------------------------------------
+# INSTALAÇÃO DO NODE.JS E NPM
+# Copia os binários do Node.js da imagem oficial lts (ou mude para 20, 22, etc.)
+# ----------------------------------------------------
+COPY --from=node:lts /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:lts /usr/local/bin/node /usr/local/bin/node
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-merge-driver /usr/local/bin/npm-merge-driver \
+    && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
 # Cria usuário do sistema para executar Composer e comandos Artisan (PHP-FPM)
 RUN useradd -G www-data,root -u $uid -d /home/$user $user \
     && mkdir -p /home/$user/.composer \
