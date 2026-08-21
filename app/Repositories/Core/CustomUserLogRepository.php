@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Collection;
 
 class CustomUserLogRepository extends BaseRepository
 {
-    
+    private CustomUserLog $entity;
 
-    public function __construct(
-        private CustomUserLog $entity,
-
-    ) {
+    public function __construct(CustomUserLog $entity)
+    {
         parent::__construct($entity);
+        $this->entity = $entity;
     }
 
     public function getAll(): Collection

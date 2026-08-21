@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 
 class UserController extends CrudController
 {
-    public function __construct(private UserService $service)
+    public function __construct(UserService $service)
     {
         parent::__construct($service);
     }

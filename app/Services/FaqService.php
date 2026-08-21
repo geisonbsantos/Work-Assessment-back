@@ -7,7 +7,12 @@ use App\Repositories\Core\FaqRepository;
 
 class FaqService implements BaseInterface
 {
-    public function __construct(private FaqRepository $repository) {}
+    private FaqRepository $repository;
+
+    public function __construct(FaqRepository $repository)
+    {
+        $this->repository = $repository;
+    }
 
     public function getAll()
     {

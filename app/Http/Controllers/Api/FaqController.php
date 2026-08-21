@@ -8,9 +8,8 @@ use Illuminate\Http\JsonResponse;
 
 class FaqController extends CrudController
 {
-    public function __construct(
-        private FaqService $service
-    ) {
+    public function __construct(FaqService $service)
+    {
         parent::__construct($service);
     }
 

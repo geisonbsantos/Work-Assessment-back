@@ -6,9 +6,12 @@ use App\Models\ResetPassword;
 
 class PasswordResetRepository extends BaseRepository
 {
-    public function __construct(private ResetPassword $entity)
+    private ResetPassword $entity;
+
+    public function __construct(ResetPassword $entity)
     {
         parent::__construct($entity);
+        $this->entity = $entity;
     }
 
     public function findWhereTokenAndEmail($token, $email)

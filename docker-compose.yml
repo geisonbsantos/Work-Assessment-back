@@ -1,47 +1,97 @@
-# Define os serviços (containers) que compõem a aplicação
 services:
-    # Serviço da aplicação Laravel com PHP-FPM
+    # ============================================================
+    # Laravel + PHP-FPM + Node.js
+    # ============================================================
     app:
-        # Configuração de build da imagem personalizada
         build:
             args:
-                user: user-docker # Nome do usuário no container
-                uid: 1000 # UID do usuário do host (deve corresponder ao seu UID)
-            context: ./ # Diretório onde está o Dockerfile
-            dockerfile: Dockerfile # Nome do arquivo Dockerfile
-        image: work-assessment-back-app # Nome da imagem Docker gerada
-        container_name: work-assessment-back-api # Nome do container
-        restart: unless-stopped # Reinicia automaticamente (exceto se parado manualmente)
-        working_dir: /var/www/ # Diretório de trabalho dentro do container
-        user: "1000:1000" # Executa como usuário/grupo com UID 1000
+                user: user-docker
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+
+        image: work-assessment-back-app
+        container_name: work-assessment-back-api
+        restart: unless-stopped
+
+        working_dir: /var/www/
+
+        user: "1000:1000"
+
         environment:
-            - XDEBUG_MODE=debug
-            - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 idekey=docker
-        # Volumes - monta diretórios/arquivos do host no container
+            XDEBUG_MODE: debug
+            XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003 idekey=docker
+
+            # Permite que o Vite seja acessado pelo host
+            HOST: 0.0.0.0
+
         volumes:
-            - ./:/var/www # Monta código fonte do projeto no container
-            - ./docker/php/php-local.ini:/usr/local/etc/php/conf.d/php-local.ini # Configurações PHP personalizadas
-            - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini # Configurações Xdebug personalizadas
-        # Rede customizada para comunicação entre containers
+            - ./:/var/www
+            - ./docker/php/php-local.ini:/usr/local/etc/php/conf.d/php-local.ini
+            - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+
         networks:
             - work-assessment-back
 
-    # Serviço do nginx para servir a aplicação
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+
+    # ============================================================
+    # Nginx
+    # ============================================================
     nginx:
         image: nginx:alpine
         container_name: work-assessment-back-nginx
         restart: unless-stopped
+
         ports:
-            - 9080:80 # Acessa aplicação em http://localhost:9080
+            - "9080:80"
+
         volumes:
-            - ./:/var/www # Monta código fonte do projeto no container
-            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf # Configuração do nginx
+            - ./:/var/www
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+
         depends_on:
             - app
+
         networks:
             - work-assessment-back
 
-# Define redes customizadas para comunicação entre containers
+    # ============================================================
+    # Vite / Node.js
+    #
+    # O Node está dentro do container app.
+    # Este serviço apenas executa o Vite usando a mesma imagem.
+    # ============================================================
+    vite:
+        image: work-assessment-back-app
+        container_name: work-assessment-back-vite
+
+        working_dir: /var/www
+
+        user: "1000:1000"
+
+        command: npm run dev -- --host 0.0.0.0
+
+        volumes:
+            - ./:/var/www
+
+        ports:
+            - "5173:5173"
+
+        depends_on:
+            - app
+
+        networks:
+            - work-assessment-back
+
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+
+
+# ============================================================
+# Rede
+# ============================================================
 networks:
-    work-assessment-back: # Nome da rede
-        driver: bridge # Driver de rede (padrão para containers na mesma máquina)
+    work-assessment-back:
+        driver: bridge

@@ -19,9 +19,13 @@ use App\Traits\CustomUserLogTrait;
 class UserService implements UserInterface
 {
     use CustomUserLogTrait;
+
+    private $repository;
     public function __construct(
-        private UserRepository $repository
-    ) {}
+        UserRepository $repository
+    ) {
+        $this->repository = $repository;
+    }
 
     public function getAll(): UserCollection
     {
@@ -96,7 +100,7 @@ class UserService implements UserInterface
         return $user->createToken('AccessToken', $abilities, now()->addMinutes(480))->plainTextToken;
     }
 
-    public function loggedInUser($request)
+    public function loggedInUser($request): UserResource
     {
         $abilities = $this->abilitesToArray($request->user());
 
@@ -122,7 +126,7 @@ class UserService implements UserInterface
         return $data;
     }
 
-    public function restore(int $id)
+    public function restore(int $id): void
     {
         $this->repository->restore($id);
     }
