@@ -60,7 +60,7 @@ class UserService implements UserInterface
 
         $this->createCustomUserLog('Criou um novo usuário.');
 
-        Mail::to($data['email'])->send(new AccountCreateMail($data));
+        // Mail::to($data['email'])->send(new AccountCreateMail($data));
     }
 
     public function update(array $request, int $id): void
