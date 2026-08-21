@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AbilityController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CustomUserLogController;
+use App\Http\Controllers\Api\ExpertiseAreaController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ProfileController;
@@ -72,7 +73,6 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
         Route::delete('/{id}', 'destroy')->middleware(['abilities:del_usuario']);
         Route::put('/restore/{id}', 'restore')->middleware(['abilities:del_usuario']);
     });
-
     /*
     |--------------------------------------------------------------------------
     | Faq Routes
@@ -84,7 +84,6 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
         Route::put('/{id}', [FaqController::class, 'beforeUpdate'])->middleware(['abilities:cad_faqs']);
         Route::delete('/{id}', [FaqController::class, 'destroy'])->middleware(['abilities:del_faqs']);
     });
-
     /*
     |--------------------------------------------------------------------------
     | Type Logs
@@ -93,6 +92,18 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
     Route::prefix('user_custom_logs')->group(function () {
         Route::get('/', [CustomUserLogController::class, 'index'])->middleware(['abilities:list_logs']);
         Route::post('/', [CustomUserLogController::class, 'store'])->middleware(['abilities:cad_logs']);
+    });
+    /*
+    |--------------------------------------------------------------------------
+    | Expertise Areas Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(ExpertiseAreaController::class)->prefix('expertise-areas')->group(function () {
+        Route::get('/', 'index')->middleware(['abilities:list_areas_expertise']);
+        Route::get('/{id}', 'show')->middleware(['abilities:list_areas_expertise']);
+        Route::post('/', 'beforeStore')->middleware(['abilities:cad_areas_expertise']);
+        Route::put('/{id}', 'beforeUpdate')->middleware(['abilities:cad_areas_expertise']);
+        Route::delete('/{id}', 'destroy')->middleware(['abilities:del_areas_expertise']);
     });
 
 });
