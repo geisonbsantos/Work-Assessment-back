@@ -45,21 +45,15 @@ class ExpertiseAreaService
         $this->repository->update($ExpertiseArea, $data);
     }
 
+    public function filter(array $filters)
+    {
+        return $this->repository->filter($filters);
+    }
+
     public function destroy(int $id): void
     {
         $ExpertiseArea = $this->findById($id);
         $this->repository->destroy($ExpertiseArea);
-    }
-
-    public function getAbilities(int $id): ExpertiseArea
-    {
-        return $this->repository->getAbilities($id);
-    }
-
-    public function storeAbilities(array $request, int $id): void
-    {
-        $ExpertiseArea = $this->findById($id);
-        $this->repository->storeAbilities($ExpertiseArea, $request);
     }
 
     public function restore(int $id)

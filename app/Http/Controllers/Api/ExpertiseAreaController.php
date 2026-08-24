@@ -31,18 +31,22 @@ class ExpertiseAreaController extends CrudController
         return $this->update($request, $uuid);
     }
 
-    protected function getAbilities(int $id): Response
+    public function filter(Request $request)
     {
-        $response = $this->service->getAbilities($id);
-
-        return response($response, 200);
+        return $this->service->filter($request->all());
     }
 
-    protected function storeAbilities(AttachExpertiseAreaAbilitiesFormRequest $request, int $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
-        $request->validated();
-        $this->service->storeAbilities($request->all(), $id);
+        $this->service->destroy($id);
 
-        return response()->json(['message' => 'Vínculo realizado com sucesso.'], 200);
+        return response()->json(['message' => 'Registro deletado com sucesso.'], 200);
+    }
+
+    public function restore(int $id): JsonResponse
+    {
+        $this->service->restore($id);
+
+        return response()->json(['message' => 'Registro restaurado com sucesso.'], 200);
     }
 }

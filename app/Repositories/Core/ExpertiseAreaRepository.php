@@ -19,14 +19,20 @@ class ExpertiseAreaRepository extends BaseRepository
         $this->entity->firstOrCreate($data);
     }
 
-    public function getAbilities(int $id): ExpertiseArea
+    public function filter(array $filters)
     {
-        return $this->entity->with('abilities')->findOrFail($id);
-    }
+        // query que mostra os registros que foram deletados
+        $query = $this->entity;
 
-    public function storeAbilities(object $ExpertiseArea, array $request): void
-    {
-        $ExpertiseArea->abilities()->sync($request['abilities']);
+        if (isset($filters['description'])) {
+            $query->where('description', 'like', '%' . $filters['description'] . '%');
+        }
+
+        if (isset($filters['slug'])) {
+            $query->where('slug', 'like', '%' . $filters['slug'] . '%');
+        }
+
+        return $query->withTrashed()->paginate();
     }
 
     public function destroy(object $entity): void

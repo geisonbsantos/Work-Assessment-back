@@ -19,6 +19,7 @@ class ExpertiseAreaResource extends JsonResource
             'description' => $this->description,
             'slug' => $this->slug,
             'created_at' => $this->created_at->format('d-m-Y'),
+            'deleted_at' => $this->deleted_at ? $this->deleted_at->format('d-m-Y') : null,
         ];
     }
 }

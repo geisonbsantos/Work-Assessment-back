@@ -99,11 +99,13 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
     |--------------------------------------------------------------------------
     */
     Route::controller(ExpertiseAreaController::class)->prefix('expertise-areas')->group(function () {
+        Route::get('/filter', 'filter')->middleware(['abilities:list_areas_expertise']);
         Route::get('/', 'index')->middleware(['abilities:list_areas_expertise']);
         Route::get('/{id}', 'show')->middleware(['abilities:list_areas_expertise']);
         Route::post('/', 'beforeStore')->middleware(['abilities:cad_areas_expertise']);
         Route::put('/{id}', 'beforeUpdate')->middleware(['abilities:cad_areas_expertise']);
         Route::delete('/{id}', 'destroy')->middleware(['abilities:del_areas_expertise']);
+        Route::put('/restore/{id}', 'restore')->middleware(['abilities:del_areas_expertise']);
     });
 
 });

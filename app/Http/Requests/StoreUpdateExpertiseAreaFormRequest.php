@@ -26,13 +26,12 @@ class StoreUpdateExpertiseAreaFormRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'description' => 'required|string|max:255|unique:ExpertiseAreas,description',
-            'slug' => 'required|string|max:50|unique:ExpertiseAreas,slug',
+            'description' => 'required|string|max:255|unique:expertise_areas,description',
+            // 'slug' => 'required|string|max:50|unique:expertise_areas,slug',
         ];
 
         if (in_array($this->method(), ['PUT', 'PATCH'])) {
-            $rules['description'] = "required|string|max:255|unique:ExpertiseAreas,description,{$this->segment(3)},id";
-            $rules['slug'] = "required|string|max:50|unique:ExpertiseAreas,slug,{$this->segment(3)},id";
+            $rules['description'] = "required|string|max:255|unique:expertise_areas,description,{$this->segment(3)},id";
         }
 
         return $rules;
