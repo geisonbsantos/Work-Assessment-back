@@ -67,4 +67,9 @@ class User extends Authenticatable implements Auditable
     {
         return $this->belongsToMany(ExpertiseArea::class, 'user_expertise_areas', 'user_id', 'expertise_area_id');
     }
+
+    public function user_expertise_areas()
+    {
+        return $this->hasMany(UserExpertiseArea::class);
+    }
 }
