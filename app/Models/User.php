@@ -25,6 +25,8 @@ class User extends Authenticatable implements Auditable
         'cpf',
         'email',
         'profile_id',
+        'unity_id',
+        'sector_id',
         'password',
     ];
 
@@ -61,6 +63,16 @@ class User extends Authenticatable implements Auditable
     public function profile()
     {
         return $this->hasOne(Profile::class, 'id', 'profile_id');
+    }
+
+    public function unity()
+    {
+        return $this->hasOne(Unity::class, 'id', 'unity_id');
+    }
+
+    public function sector()
+    {
+        return $this->hasOne(Sector::class, 'id', 'sector_id');
     }
 
     public function expertiseAreas()

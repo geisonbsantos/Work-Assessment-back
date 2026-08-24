@@ -19,17 +19,7 @@ class ExpertiseAreaSeeder extends Seeder
             /*
             |--------------------------------------------------------------------------
             | Expertise Areas for user
-            |--------------------------------------------------------------
-Desenvolvedor FrontEnd
-Desenvolvedor   Back 
-Desenvolvedor FullStack
-UX/UI 
-Infraestrutura
-Suporte Técnico
-BI 
-Product Owner
-Assessoria
-Geolocalização
+            |--------------------------------------------------------------------------
             */
             [
                 'description' => 'Desenvolvedor Front-end',
