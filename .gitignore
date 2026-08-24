@@ -16,3 +16,5 @@ yarn-error.log
 .DS_Store
 /.phpunit.cache
 .phpunit.result.cache
+/.deep-copilot
+database.sqlite

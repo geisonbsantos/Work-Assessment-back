@@ -6,9 +6,12 @@ use App\Models\Profile;
 
 class ProfileRepository extends BaseRepository
 {
-    public function __construct(private Profile $entity)
+    private Profile $entity;
+
+    public function __construct(Profile $entity)
     {
         parent::__construct($entity);
+        $this->entity = $entity;
     }
 
     public function store(array $data): void

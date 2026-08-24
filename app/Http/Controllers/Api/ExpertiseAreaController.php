@@ -2,27 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\AttachProfileAbilitiesFormRequest;
-use App\Http\Requests\StoreUpdateProfileFormRequest;
-use App\Services\ProfileService;
+use App\Http\Controllers\Api\CrudController;
+use App\Http\Requests\StoreUpdateExpertiseAreaFormRequest;
+use App\Services\ExpertiseAreaService;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use App\Http\Requests\AttachExpertiseAreaAbilitiesFormRequest;
 
-class ProfileController extends CrudController
+class ExpertiseAreaController extends CrudController
 {
-    public function __construct(ProfileService $service)
+    public function __construct(ExpertiseAreaService $service)
     {
         parent::__construct($service);
     }
 
-    protected function beforeStore(StoreUpdateProfileFormRequest $request): JsonResponse
+    protected function beforeStore(StoreUpdateExpertiseAreaFormRequest $request): JsonResponse
     {
         $request->validated();
 
         return $this->store($request);
     }
 
-    protected function beforeUpdate(StoreUpdateProfileFormRequest $request, string $uuid): JsonResponse
+    protected function beforeUpdate(StoreUpdateExpertiseAreaFormRequest $request, string $uuid): JsonResponse
     {
         $request->validated();
 
@@ -36,7 +38,7 @@ class ProfileController extends CrudController
         return response($response, 200);
     }
 
-    protected function storeAbilities(AttachProfileAbilitiesFormRequest $request, int $id): JsonResponse
+    protected function storeAbilities(AttachExpertiseAreaAbilitiesFormRequest $request, int $id): JsonResponse
     {
         $request->validated();
         $this->service->storeAbilities($request->all(), $id);

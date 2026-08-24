@@ -9,10 +9,6 @@ ARG uid
 WORKDIR /var/www
 
 # Instala dependências do sistema necessárias para o Laravel
-# git: controle de versão, curl: cliente HTTP, libpng-dev: biblioteca PNG
-# libonig-dev: expressões regulares, libxml2-dev: biblioteca XML
-# zip/unzip: compactação, autoconf: configuração automática
-# g++: compilador C++, make: ferramenta de build
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -24,37 +20,64 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     g++ \
     make \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# Node.js + npm
+# ============================================================
+
+# Adiciona o repositório do Node.js 22 LTS
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Verifica versões instaladas
+RUN node --version && npm --version
+
+# ============================================================
+# PHP Extensions
+# ============================================================
 
 # Adiciona script para instalar extensões PHP facilmente
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/install-php-extensions
 
-# Instala Xdebug para debugging
-RUN pecl install xdebug-3.3.2 && docker-php-ext-enable xdebug
+# Instala Xdebug
+RUN pecl install xdebug-3.3.2 \
+    && docker-php-ext-enable xdebug
 
 # Instala extensões PHP essenciais
-# gd: manipulação de imagens, zip: compactação, oci8: Oracle database
 RUN install-php-extensions gd zip oci8
 
 # Copia configuração personalizada do Xdebug
 COPY docker/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Instala extensões PHP adicionais
-# RUN docker-php-ext-install mbstring exif pcntl bcmath pdo pdo_mysql
 RUN docker-php-ext-install mbstring exif pcntl bcmath
 
-# Obtém a versão mais recente do Composer (gerenciador de dependências PHP)
+# ============================================================
+# Composer
+# ============================================================
+
+# Obtém a versão mais recente do Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Cria usuário do sistema para executar Composer e comandos Artisan (PHP-FPM)
+# ============================================================
+# Usuário
+# ============================================================
+
+# Cria usuário do sistema para executar Composer e comandos Artisan
 RUN useradd -G www-data,root -u $uid -d /home/$user $user \
     && mkdir -p /home/$user/.composer \
     && chown -R $user:$user /home/$user
 
-# Configura permissões para que tanto www-data quanto usuário personalizado trabalhem
-RUN chown -R $user:$user /var/www && \
-    chmod -R 775 /var/www && \
-    usermod -aG www-data $user
+# Configura permissões
+RUN chown -R $user:$user /var/www \
+    && chmod -R 775 /var/www \
+    && usermod -aG www-data $user
 
 # Expõe porta 9000 para PHP-FPM
 EXPOSE 9000

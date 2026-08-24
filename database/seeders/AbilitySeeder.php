@@ -108,7 +108,6 @@ class AbilitySeeder extends Seeder
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
-
             /*
             |--------------------------------------------------------------------------
             | Abilities for CustomLog
@@ -123,6 +122,29 @@ class AbilitySeeder extends Seeder
              [
                 'name' => 'Cadastrar logs',
                 'slug' => 'cad_logs',
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ],
+            /*
+            |--------------------------------------------------------------------------
+            | Abilities for ExpertiseArea
+            |--------------------------------------------------------------------------
+            */
+            [
+                'name' => 'Listar areas de expertise',
+                'slug' => 'list_areas_expertise',
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ],
+            [
+                'name' => 'Cadastrar areas de expertise',
+                'slug' => 'cad_areas_expertise',
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ],
+            [
+                'name' => 'Deletar areas de expertise',
+                'slug' => 'del_areas_expertise',
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],

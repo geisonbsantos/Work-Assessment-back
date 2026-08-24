@@ -9,7 +9,7 @@ use Illuminate\Http\Response;
 
 class CrudController extends Controller
 {
-    private $service;
+    protected object $service;
 
     protected function __construct(object $service)
     {
