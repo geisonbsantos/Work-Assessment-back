@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Helpers\ExpertiseAreaSlugHelpers;
 use App\Http\Resources\ExpertiseAreaCollection;
 use App\Http\Resources\ExpertiseAreaResource;
-use App\Models\ExpertiseArea;
 use App\Repositories\Core\ExpertiseAreaRepository;
 
 class ExpertiseAreaService
