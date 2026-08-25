@@ -6,7 +6,7 @@ use App\Repositories\Core\CustomUserLogRepository;
 
 class CustomUserLogService
 {
-    private $repository;
+    private CustomUserLogRepository $repository;
 
     public function __construct(CustomUserLogRepository $repository)
     {

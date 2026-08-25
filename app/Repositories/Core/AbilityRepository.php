@@ -6,8 +6,11 @@ use App\Models\Ability;
 
 class AbilityRepository extends BaseRepository
 {
+    private Ability $entity;
+
     public function __construct(Ability $entity)
     {
         parent::__construct($entity);
+        $this->entity = $entity;
     }
 }

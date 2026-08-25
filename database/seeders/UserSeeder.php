@@ -15,12 +15,14 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $user = [
+        $users = [
             [
                 'name' => 'ADMINISTRADOR GERAL',
                 'cpf' => '76345028045',
                 'email' => 'administrador@saude.ba.gov.br',
                 'profile_id' => '1',
+                'unity_id' => '1',
+                'sector_id' => '1',
                 'password' => Hash::make('123456'),
             ],
             [
@@ -28,6 +30,8 @@ class UserSeeder extends Seeder
                 'cpf' => '90211928534',
                 'email' => 'geison.santos@saude.ba.gov.br',
                 'profile_id' => '3',
+                'unity_id' => '1',
+                'sector_id' => '1',
                 'password' => Hash::make('123456'),
             ],
             [
@@ -35,6 +39,8 @@ class UserSeeder extends Seeder
                 'cpf' => '25631557037',
                 'email' => 'isadora.cruz@saude.ba.gov.br',
                 'profile_id' => '2',
+                'unity_id' => '1',
+                'sector_id' => '1',
                 'password' => Hash::make('123456'),
             ],
             [
@@ -42,9 +48,23 @@ class UserSeeder extends Seeder
                 'cpf' => '00735177554',
                 'email' => 'priscila.macedo@saude.ba.gov.br',
                 'profile_id' => '4',
+                'unity_id' => '1',
+                'sector_id' => '1',
                 'password' => Hash::make('123456'),
             ],
         ];
-        User::insert($user);
+
+        User::insert($users);
+
+        // foreach ($users as $user) {
+        //     User::firstOrCreate([
+        //         'name' => $user['name'],
+        //         'cpf' => $user['cpf'],
+        //         'email' => $user['email'],
+        //         'profile_id' => $user['profile_id'],
+        //         'unity_id' => $user['unity_id'],
+        //         'password' => $user['password'],
+        //     ]);
+        // }
     }
 }

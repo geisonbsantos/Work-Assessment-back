@@ -3,10 +3,13 @@
 use App\Http\Controllers\Api\AbilityController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CustomUserLogController;
+use App\Http\Controllers\Api\ExpertiseAreaController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReportErrorController;
+use App\Http\Controllers\Api\UnityController;
+use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,6 +64,34 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
     });
     /*
     |--------------------------------------------------------------------------
+    | Unities Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(UnityController::class)->prefix('unities')->group(function () {
+        Route::get('/filter', 'filter')->middleware(['abilities:list_unities']);
+        Route::get('/', 'index')->middleware(['abilities:list_unities']);
+        Route::get('/{id}', 'show')->middleware(['abilities:list_unities']);
+        Route::post('/', 'beforeStore')->middleware(['abilities:cad_unities']);
+        Route::put('/{id}', 'beforeUpdate')->middleware(['abilities:cad_unities']);
+        Route::delete('/{id}', 'destroy')->middleware(['abilities:del_unities']);
+        Route::put('/restore/{id}', 'restore')->middleware(['abilities:del_unities']);
+    });
+    /*
+    |--------------------------------------------------------------------------
+    | Sectors Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(SectorController::class)->prefix('sectors')->group(function () {
+        Route::get('/filter', 'filter')->middleware(['abilities:list_unities']);
+        Route::get('/', 'index')->middleware(['abilities:list_unities']);
+        Route::get('/{id}', 'show')->middleware(['abilities:list_unities']);
+        Route::post('/', 'beforeStore')->middleware(['abilities:cad_unities']);
+        Route::put('/{id}', 'beforeUpdate')->middleware(['abilities:cad_unities']);
+        Route::delete('/{id}', 'destroy')->middleware(['abilities:del_unities']);
+        Route::put('/restore/{id}', 'restore')->middleware(['abilities:del_unities']);
+    });
+    /*
+    |--------------------------------------------------------------------------
     | Users Routes
     |--------------------------------------------------------------------------
     */
@@ -72,7 +103,6 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
         Route::delete('/{id}', 'destroy')->middleware(['abilities:del_usuario']);
         Route::put('/restore/{id}', 'restore')->middleware(['abilities:del_usuario']);
     });
-
     /*
     |--------------------------------------------------------------------------
     | Faq Routes
@@ -84,7 +114,6 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
         Route::put('/{id}', [FaqController::class, 'beforeUpdate'])->middleware(['abilities:cad_faqs']);
         Route::delete('/{id}', [FaqController::class, 'destroy'])->middleware(['abilities:del_faqs']);
     });
-
     /*
     |--------------------------------------------------------------------------
     | Type Logs
@@ -93,6 +122,20 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
     Route::prefix('user_custom_logs')->group(function () {
         Route::get('/', [CustomUserLogController::class, 'index'])->middleware(['abilities:list_logs']);
         Route::post('/', [CustomUserLogController::class, 'store'])->middleware(['abilities:cad_logs']);
+    });
+    /*
+    |--------------------------------------------------------------------------
+    | Expertise Areas Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(ExpertiseAreaController::class)->prefix('expertise-areas')->group(function () {
+        Route::get('/filter', 'filter')->middleware(['abilities:list_areas_expertise']);
+        Route::get('/', 'index')->middleware(['abilities:list_areas_expertise']);
+        Route::get('/{id}', 'show')->middleware(['abilities:list_areas_expertise']);
+        Route::post('/', 'beforeStore')->middleware(['abilities:cad_areas_expertise']);
+        Route::put('/{id}', 'beforeUpdate')->middleware(['abilities:cad_areas_expertise']);
+        Route::delete('/{id}', 'destroy')->middleware(['abilities:del_areas_expertise']);
+        Route::put('/restore/{id}', 'restore')->middleware(['abilities:del_areas_expertise']);
     });
 
 });

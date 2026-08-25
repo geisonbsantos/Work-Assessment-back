@@ -15,9 +15,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             ProfileSeeder::class,
+            ExpertiseAreaSeeder::class,
+            UnitySeeder::class,
+            SectorSeeder::class,
             UserSeeder::class,
             AbilitySeeder::class,
             ProfileAbilitySeeder::class,
+            UserExpertiseAreaSeeder::class,
         ]);
     }
 }

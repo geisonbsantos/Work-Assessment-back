@@ -8,10 +8,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use \OwenIt\Auditing\Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +25,8 @@ class User extends Authenticatable
         'cpf',
         'email',
         'profile_id',
+        'unity_id',
+        'sector_id',
         'password',
     ];
 
@@ -59,5 +63,25 @@ class User extends Authenticatable
     public function profile()
     {
         return $this->hasOne(Profile::class, 'id', 'profile_id');
+    }
+
+    public function unity()
+    {
+        return $this->hasOne(Unity::class, 'id', 'unity_id');
+    }
+
+    public function sector()
+    {
+        return $this->hasOne(Sector::class, 'id', 'sector_id');
+    }
+
+    public function expertiseAreas()
+    {
+        return $this->belongsToMany(ExpertiseArea::class, 'user_expertise_areas', 'user_id', 'expertise_area_id');
+    }
+
+    public function user_expertise_areas()
+    {
+        return $this->hasMany(UserExpertiseArea::class);
     }
 }

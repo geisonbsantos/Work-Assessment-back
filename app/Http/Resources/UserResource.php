@@ -20,10 +20,16 @@ class UserResource extends JsonResource
             'cpf' => $this->cpf,
             'email' => $this->email,
             'profile' => $this->profile->name,
+            'unity' => $this->unity->description,
+            'sector' => $this->sector->description,
             'profile_id' => $this->profile_id,
+            'unity_id' => $this->unity_id,
+            'sector_id' => $this->sector_id,
             'created_at' => $this->created_at,
             'deleted_at' => $this->deleted_at,
             'abilities' => $this->abilities,
+            'abilitys' => $this->profile->abilitys,
+            'expertise_areas' => $this->expertiseAreas
         ];
     }
 }

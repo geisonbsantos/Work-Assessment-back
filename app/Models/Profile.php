@@ -28,4 +28,9 @@ class Profile extends Model
     {
         return $this->belongsToMany(Ability::class, 'profile_abilities', 'profile_id', 'ability_id');
     }
+
+    public function abilitys()
+    {
+        return $this->hasMany(ProfileAbility::class, 'profile_id', 'id');
+    }
 }

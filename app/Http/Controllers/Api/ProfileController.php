@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 
 class ProfileController extends CrudController
 {
-    public function __construct(private ProfileService $service)
+    public function __construct(ProfileService $service)
     {
         parent::__construct($service);
     }

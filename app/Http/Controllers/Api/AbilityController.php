@@ -8,9 +8,8 @@ use Illuminate\Http\JsonResponse;
 
 class AbilityController extends CrudController
 {
-    public function __construct(
-        private AbilityService $service
-    ) {
+    public function __construct(AbilityService $service)
+    {
         parent::__construct($service);
     }
 
