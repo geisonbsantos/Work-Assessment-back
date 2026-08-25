@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\UnitySlugHelpers;
+use App\Helpers\CreateSlugHelpers;
 use App\Http\Resources\UnityCollection;
 use App\Http\Resources\UnityResource;
 use App\Repositories\Core\UnityRepository;
@@ -33,7 +33,7 @@ class UnityService
 
     public function store(array $data): void
     {
-        $data = UnitySlugHelpers::prepareDataForStore($data);
+        $data = CreateSlugHelpers::prepareDataForStore($data);
 
         $this->repository->store($data);
     }

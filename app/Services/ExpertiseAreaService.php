@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\ExpertiseAreaSlugHelpers;
+use App\Helpers\CreateSlugHelpers;
 use App\Http\Resources\ExpertiseAreaCollection;
 use App\Http\Resources\ExpertiseAreaResource;
 use App\Repositories\Core\ExpertiseAreaRepository;
@@ -33,7 +33,7 @@ class ExpertiseAreaService
 
     public function store(array $data): void
     {
-        $data = ExpertiseAreaSlugHelpers::prepareDataForStore($data);
+        $data = CreateSlugHelpers::prepareDataForStore($data);
 
         $this->repository->store($data);
     }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReportErrorController;
 use App\Http\Controllers\Api\UnityController;
+use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -67,6 +68,20 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
     |--------------------------------------------------------------------------
     */
     Route::controller(UnityController::class)->prefix('unities')->group(function () {
+        Route::get('/filter', 'filter')->middleware(['abilities:list_unities']);
+        Route::get('/', 'index')->middleware(['abilities:list_unities']);
+        Route::get('/{id}', 'show')->middleware(['abilities:list_unities']);
+        Route::post('/', 'beforeStore')->middleware(['abilities:cad_unities']);
+        Route::put('/{id}', 'beforeUpdate')->middleware(['abilities:cad_unities']);
+        Route::delete('/{id}', 'destroy')->middleware(['abilities:del_unities']);
+        Route::put('/restore/{id}', 'restore')->middleware(['abilities:del_unities']);
+    });
+    /*
+    |--------------------------------------------------------------------------
+    | Sectors Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(SectorController::class)->prefix('sectors')->group(function () {
         Route::get('/filter', 'filter')->middleware(['abilities:list_unities']);
         Route::get('/', 'index')->middleware(['abilities:list_unities']);
         Route::get('/{id}', 'show')->middleware(['abilities:list_unities']);
