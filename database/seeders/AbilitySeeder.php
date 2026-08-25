@@ -24,20 +24,14 @@ class AbilitySeeder extends Seeder
             [
                 'name' => 'Listar usuários',
                 'slug' => 'list_usuario',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Cadastrar usuário',
                 'slug' => 'cad_usuario',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Deletar usuário',
                 'slug' => 'del_usuario',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             /*
             |--------------------------------------------------------------------------
@@ -47,20 +41,14 @@ class AbilitySeeder extends Seeder
             [
                 'name' => 'Listar perfis',
                 'slug' => 'list_perfil',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Cadastrar perfil',
                 'slug' => 'cad_perfil',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Deletar perfil',
                 'slug' => 'del_perfil',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             /*
             |--------------------------------------------------------------------------
@@ -70,20 +58,14 @@ class AbilitySeeder extends Seeder
             [
                 'name' => 'Listar habilidade',
                 'slug' => 'list_habilidade',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Cadastrar habilidade',
                 'slug' => 'cad_habilidade',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Deletar habilidade',
                 'slug' => 'del_habilidade',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             /*
             |--------------------------------------------------------------------------
@@ -93,20 +75,14 @@ class AbilitySeeder extends Seeder
             [
                 'name' => 'Listar perguntas frequentes',
                 'slug' => 'list_faqs',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Cadastrar perguntas frequentes',
                 'slug' => 'cad_faqs',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Deletar perguntas frequentes',
                 'slug' => 'del_faqs',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             /*
             |--------------------------------------------------------------------------
@@ -116,14 +92,10 @@ class AbilitySeeder extends Seeder
             [
                 'name' => 'Listar logs',
                 'slug' => 'list_logs',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
              [
                 'name' => 'Cadastrar logs',
                 'slug' => 'cad_logs',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             /*
             |--------------------------------------------------------------------------
@@ -133,20 +105,31 @@ class AbilitySeeder extends Seeder
             [
                 'name' => 'Listar areas de expertise',
                 'slug' => 'list_areas_expertise',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Cadastrar areas de expertise',
                 'slug' => 'cad_areas_expertise',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ],
             [
                 'name' => 'Deletar areas de expertise',
                 'slug' => 'del_areas_expertise',
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ],
+            /*
+            |--------------------------------------------------------------------------
+            | Abilities for unities
+            |--------------------------------------------------------------------------
+            */
+            [
+                'name' => 'Listar unities',
+                'slug' => 'list_unities',
+            ],
+            [
+                'name' => 'Cadastrar unities',
+                'slug' => 'cad_unities',
+            ],
+            [
+                'name' => 'Deletar unities',
+                'slug' => 'del_unities',
             ],
           
         ];

@@ -3,6 +3,7 @@
 namespace App\Repositories\Core;
 use App\Models\Unity;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class UnityRepository extends BaseRepository
 {
@@ -16,13 +17,24 @@ class UnityRepository extends BaseRepository
 
     public function store(array $data): void
     {
-        $this->entity->firstOrCreate($data);
+
+        try {
+            DB::beginTransaction();
+
+            $this->entity->firstOrCreate($data);
+
+            DB::commit();
+
+        } catch (\Throwable $th) {
+            DB::rollback();
+            throw $th;
+        }
     }
 
     public function filter(array $filters)
     {
         // query que mostra os registros que foram deletados
-        $query = $this->entity;
+        $query = $this->entity->with('sectors');
 
         if (isset($filters['description'])) {
             $query->where('description', 'like', '%' . $filters['description'] . '%');
