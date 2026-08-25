@@ -33,7 +33,7 @@ class StoreUpdateSectorFormRequest extends FormRequest
 
         if (in_array($this->method(), ['PUT', 'PATCH'])) {
             $rules['description'] = "required|string|max:255|unique:sectors,description,{$this->segment(3)},id";
-            $rules['unity_id'] = "required|exists:unities,id,{$this->segment(3)},id";
+            $rules['unity_id'] = "required|exists:unities,id";
         }
 
         return $rules;

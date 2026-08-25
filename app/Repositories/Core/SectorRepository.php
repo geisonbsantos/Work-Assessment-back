@@ -47,6 +47,31 @@ class SectorRepository extends BaseRepository
         }
     }
 
+    public function update(object $entity, array $data): void
+    {
+        $unity = Unity::where('id', $data['unity_id'])->first();
+
+        if (!$unity) {
+            throw new \Exception('Unidade não encontrada para o setor.');
+        }
+        $unity_slug = $unity->slug ?? null;
+
+        try {
+            DB::beginTransaction();
+
+            // Concatenar a description do setor com o slug da unidade
+            $data['description'] = $data['description'] . ' - ' . $unity_slug;
+
+            $entity->update($data);
+
+            DB::commit();
+
+        } catch (\Throwable $th) {
+            DB::rollback();
+            throw $th;
+        }
+    }
+
     public function filter(array $filters)
     {
         // query que mostra os registros que foram deletados
