@@ -18,6 +18,7 @@ yarn-error.log
 .phpunit.result.cache
 /.deep-copilot
 database.sqlite
+*.rar
 
 # Obsidian: a documentação vive no cofre externo Safe_WA, não no repo
 /.obsidian

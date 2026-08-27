@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 #
 # UserPromptSubmit hook — Work Assessment
-# Injeta o índice do cofre Obsidian (Safe_WA) no contexto a cada mensagem
-# do usuário, tornando a consulta à documentação obrigatória antes de responder.
+# A cada mensagem do usuário, injeta no contexto:
+#   1. o índice das notas do cofre Obsidian (Safe_WA);
+#   2. o conteúdo de _Regras.md — a FONTE DA VERDADE das regras de trabalho.
 #
-# O caminho do cofre vem de WA_OBSIDIAN_VAULT (definido em .claude/settings.local.json);
+# As regras NÃO são hardcoded aqui: edite _Regras.md no cofre para mudá-las.
+# O caminho do cofre vem de WA_OBSIDIAN_VAULT (.claude/settings.local.json);
 # o valor abaixo é apenas o padrão para esta máquina.
 
 VAULT="${WA_OBSIDIAN_VAULT:-/mnt/c/Users/USUÁRIO/Desktop/Obsidian/Safe_WA}"
@@ -25,12 +27,12 @@ find "$VAULT" -type f -name '*.md' \
   -not -path '*/.obsidian/*' -not -path '*/.trash/*' \
   | LC_ALL=C sort | sed 's/^/  - /' | head -300
 echo
-echo "Regra do projeto:"
-echo "  1. Antes de responder ou escrever código, leia as notas pertinentes"
-echo "     (PRD, SDD, RPI e demais) e fundamente a resposta nelas."
-echo "  2. Se a informação necessária não existir no cofre, diga isso"
-echo "     explicitamente e proponha criar/atualizar a nota correspondente"
-echo "     (PRD/SDD/RPI) antes de prosseguir."
-echo "  3. Toda decisão de arquitetura ou requisito novo deve ser registrada"
-echo "     no cofre — o código segue a documentação, não o contrário."
+echo "------------------------------------------------------------------"
+echo "REGRAS DE TRABALHO — de $VAULT/_Regras.md (edite lá para mudar):"
+echo "------------------------------------------------------------------"
+if [ -f "$VAULT/_Regras.md" ]; then
+  cat "$VAULT/_Regras.md"
+else
+  echo "[Obsidian] AVISO: _Regras.md não encontrado no cofre. Crie-o para definir as regras."
+fi
 exit 0
