@@ -51,24 +51,24 @@ class UserRepository extends BaseRepository
             ->toArray();
     }
 
+    /**
+     * Colunas que podem ser filtradas em GET /api/users?<coluna>=<valor>.
+     * Allowlist — evita injeção de nome de coluna no SQL.
+     */
+    private const FILTRAVEIS = ['name', 'cpf', 'email'];
+
     public function applyFilter(array $items)
     {
-        $query = $this->entity::query();
-        foreach ($items as $item => $value) {
-            if ($item == 'page' || $item == 'per_page') {
+        $query = $this->entity->newQuery()->withTrashed()->with('profile');
+
+        foreach ($items as $coluna => $valor) {
+            if (! in_array($coluna, self::FILTRAVEIS, true) || blank($valor)) {
                 continue;
             }
-            if ($value) {
-                if (in_array($item, ['name'])) {
-                    $value = mb_strtoupper($value, 'UTF-8');
-                    $query->where($item, 'LIKE', "%$value%");
-                } else {
-                    $query->whereRaw("UPPER($item) LIKE '%'||UPPER('".$value."')||'%'");
-                }
-            }
+            // $coluna vem da allowlist (seguro interpolar); $valor é bound.
+            $query->whereRaw("UPPER($coluna) LIKE ?", ['%'.mb_strtoupper((string) $valor, 'UTF-8').'%']);
         }
-        $page = $items['per_page'] ?? 10;
 
-        return $query->orderBy('name')->paginate($page);
+        return $query->orderBy('name')->paginate($items['per_page'] ?? 10);
     }
 }
