@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ResetPasswordFormRequest extends FormRequest
+class ValidCredentialsFormRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,9 +26,8 @@ class ResetPasswordFormRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => 'required|email',
-            'token' => 'required|string|max:64',
-            'password' => 'required|string|min:8|confirmed',
+            'cpf' => 'required|cpf',
+            'password' => 'required|string|min:3',
         ];
     }
 

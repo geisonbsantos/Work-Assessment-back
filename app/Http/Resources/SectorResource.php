@@ -17,12 +17,13 @@ class SectorResource extends JsonResource
         return [
             'id' => $this->id,
             'description' => $this->description,
+            'description_completa' => trim($this->description).' - '.$this->unity?->slug,
             'slug' => $this->slug,
             'unity_id' => $this->unity_id,
-            'unity_description' => $this->unity->description,
-            'unity_slug' => $this->unity->slug,
-            'created_at' => $this->created_at->format('d-m-Y'),
-            'deleted_at' => $this->deleted_at ? $this->deleted_at->format('d-m-Y') : null,
+            'unity_description' => $this->unity?->description,
+            'unity_slug' => $this->unity?->slug,
+            'created_at' => $this->created_at?->format('d-m-Y'),
+            'deleted_at' => $this->deleted_at?->format('d-m-Y'),
         ];
     }
 }

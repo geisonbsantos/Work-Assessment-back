@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Api\CrudController;
 use App\Http\Requests\StoreUpdateExpertiseAreaFormRequest;
 use App\Services\ExpertiseAreaService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
-use App\Http\Requests\AttachExpertiseAreaAbilitiesFormRequest;
+use Illuminate\Http\Request;
 
 class ExpertiseAreaController extends CrudController
 {

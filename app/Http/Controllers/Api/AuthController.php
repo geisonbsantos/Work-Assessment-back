@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginFormRequest;
+use App\Http\Requests\ValidCredentialsFormRequest;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,17 +24,22 @@ class AuthController extends Controller
         return response()->json(['message' => 'Autenticado com sucesso!', 'token' => $response], 200);
     }
 
+    public function validCredentials(ValidCredentialsFormRequest $request): JsonResponse
+    {
+        $user = $this->service->validCredentials($request);
+
+        return response()->json(['message' => 'Credenciais válidas!', 'user' => $user], 200);
+    }
+
     public function me(Request $request): Response
     {
-        $response = $this->service->loggedInUser($request);
-
-        return response($response, 200);
+        return response($this->service->loggedInUser($request), 200);
     }
 
     public function logout(Request $request): Response
     {
         $this->service->logout($request);
 
-        return response([], 204);
+        return response()->noContent();
     }
 }

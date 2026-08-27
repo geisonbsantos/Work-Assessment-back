@@ -24,10 +24,10 @@ class CrudController extends Controller
                 return response($this->service->paginate($request->input('per_page')), 200);
             }
 
-            return response($this->service->applyFilter($request->input(), 200));
-        } else {
-            return response($this->service->getAll(), 200);
+            return response($this->service->applyFilter($request->input()), 200);
         }
+
+        return response($this->service->getAll(), 200);
 
     }
 

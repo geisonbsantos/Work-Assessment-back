@@ -26,8 +26,8 @@ class ValidTokenFormRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => 'required|email|exists:users',
-            'token' => 'required|string|max:5',
+            'email' => 'required|email',
+            'token' => 'required|string|max:64',
         ];
     }
 

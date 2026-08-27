@@ -28,8 +28,8 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at,
             'deleted_at' => $this->deleted_at,
             'abilities' => $this->abilities,
-            'abilitys' => $this->profile->abilitys,
-            'expertise_areas' => $this->expertiseAreas
+            'abilitys' => $this->profile->abilities,
+            'expertise_areas' => $this->expertiseAreas,
         ];
     }
 }
