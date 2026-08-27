@@ -2,40 +2,64 @@
 
 namespace Database\Factories;
 
+use App\Models\Profile;
+use App\Models\Sector;
+use App\Models\Unity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 class UserFactory extends Factory
 {
     /**
-     * Define the model's default state.
-     *
-     * @return array
+     * The password used across factory users ("password").
      */
-    public function definition()
+    public const PASSWORD = 'password';
+
+    /**
+     * CPF válido (com dígitos verificadores corretos) e sem máscara.
+     */
+    public static function cpf(): string
+    {
+        $n = [];
+        for ($i = 0; $i < 9; $i++) {
+            $n[$i] = random_int(0, 9);
+        }
+        for ($t = 9; $t < 11; $t++) {
+            $soma = 0;
+            for ($c = 0; $c < $t; $c++) {
+                $soma += $n[$c] * (($t + 1) - $c);
+            }
+            $n[$t] = ((10 * $soma) % 11) % 10;
+        }
+
+        return implode('', $n);
+    }
+
+    public function definition(): array
     {
         return [
             'name' => $this->faker->name(),
-            'cpf' => '83251489003',
-            'email' => $this->faker->unique()->safeEmail(),
-            'profile_id' => 1,
+            'cpf' => self::cpf(),
+            'email' => Str::lower(Str::random(12)).'@example.test',
+            'profile_id' => Profile::factory(),
+            'unity_id' => Unity::factory(),
+            'sector_id' => Sector::factory(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'password' => self::PASSWORD, // hashed pelo mutator do model
             'remember_token' => Str::random(10),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function unverified()
+    public function unverified(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'email_verified_at' => null,
-            ];
-        });
+        return $this->state(fn (array $attributes) => ['email_verified_at' => null]);
+    }
+
+    /**
+     * Usuário no perfil ADMINISTRADOR (id 1, semeado por ProfileSeeder).
+     */
+    public function administrador(): static
+    {
+        return $this->state(fn (array $attributes) => ['profile_id' => 1]);
     }
 }

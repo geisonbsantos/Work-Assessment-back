@@ -10,14 +10,9 @@ use Illuminate\Support\Str;
  */
 class ProfileFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
-        $name = $this->faker->word();
+        $name = 'PERFIL '.Str::upper(Str::random(6));
 
         return [
             'name' => $name,
