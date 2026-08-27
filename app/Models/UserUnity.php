@@ -7,25 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class Unity extends Model implements Auditable
+class UserUnity extends Model implements Auditable
 {
     use HasFactory, SoftDeletes;
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-        'description',
-        'slug',
-        'cnes',
-        'municipality',
+        'user_id',
+        'unity_id',
     ];
 
-    public function users()
+    public function user()
     {
-        return $this->hasMany(User::class, 'unity_id', 'id');
+        return $this->belongsTo(User::class);
     }
 
-    public function sectors()
+    public function unity()
     {
-        return $this->hasMany(Sector::class, 'unity_id', 'id');
+        return $this->belongsTo(Unity::class);
     }
 }
