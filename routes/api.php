@@ -8,11 +8,10 @@ use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReportErrorController;
-use App\Http\Controllers\Api\UnityController;
 use App\Http\Controllers\Api\SectorController;
+use App\Http\Controllers\Api\UnityController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -25,10 +24,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('forget-password', [ForgotPasswordController::class, 'sendEmail'])->name('forget.password');
-Route::post('valid-token', [ForgotPasswordController::class, 'validToken'])->name('valid.token');
-Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset.password');
+// Autenticação e senha — rate limit dedicado contra brute force (achado H4).
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/validCredentials', [AuthController::class, 'validCredentials']);
+    Route::post('forget-password', [ForgotPasswordController::class, 'sendEmail'])->name('forget.password');
+    Route::post('valid-token', [ForgotPasswordController::class, 'validToken'])->name('valid.token');
+    Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset.password');
+});
+
 Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
 Route::get('/faqs', [FaqController::class, 'index'])->name('faqs');
 
@@ -48,7 +52,7 @@ Route::group(['middleware' => ['auth:sanctum', 'refreshTokenSanctum']], function
         Route::post('/', 'beforeStore')->middleware(['abilities:cad_perfil'])->name('store');
         Route::post('/{profile}/abilities', 'storeAbilities')->middleware(['abilities:cad_perfil'])->name('abilities.store');
         Route::put('/{profile}', 'beforeUpdate')->middleware(['abilities:cad_perfil'])->name('update');
-        Route::delete('/{id}', 'destroy')->name('destroy');
+        Route::delete('/{id}', 'destroy')->middleware(['abilities:del_perfil'])->name('destroy');
     });
     /*
     |--------------------------------------------------------------------------
