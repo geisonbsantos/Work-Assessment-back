@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Repositories\Core;
+
 use App\Models\ExpertiseArea;
-use Illuminate\Database\Eloquent\Collection;
 
 class ExpertiseAreaRepository extends BaseRepository
 {
@@ -21,18 +21,18 @@ class ExpertiseAreaRepository extends BaseRepository
 
     public function filter(array $filters)
     {
-        // query que mostra os registros que foram deletados
-        $query = $this->entity;
+        // withTrashed() para listar também os registros excluídos
+        $query = $this->entity->newQuery()->withTrashed();
 
-        if (isset($filters['description'])) {
-            $query->where('description', 'like', '%' . $filters['description'] . '%');
+        if (filled($filters['description'] ?? null)) {
+            $query->where('description', 'like', '%'.$filters['description'].'%');
         }
 
-        if (isset($filters['slug'])) {
-            $query->where('slug', 'like', '%' . $filters['slug'] . '%');
+        if (filled($filters['slug'] ?? null)) {
+            $query->where('slug', 'like', '%'.$filters['slug'].'%');
         }
 
-        return $query->withTrashed()->paginate();
+        return $query->paginate();
     }
 
     public function destroy(object $entity): void

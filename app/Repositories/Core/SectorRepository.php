@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Repositories\Core;
+
 use App\Models\Sector;
 use App\Models\Unity;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class SectorRepository extends BaseRepository
@@ -16,80 +16,52 @@ class SectorRepository extends BaseRepository
         $this->entity = $entity;
     }
 
+    private function assertUnity(int $unityId): void
+    {
+        if (! Unity::whereKey($unityId)->exists()) {
+            throw new \App\Exceptions\UserException('Unidade não encontrada para o setor.', 422);
+        }
+    }
+
     public function store(array $data): void
     {
-        $unity = Unity::where('id', $data['unity_id'])->first();
+        $this->assertUnity((int) $data['unity_id']);
 
-        if (!$unity) {
-            throw new \Exception('Unidade não encontrada para o setor.');
-        }
-        $unity_slug = $unity->slug ?? null;
-
-        try {
-            DB::beginTransaction();
-
-            // Concatenar adescription do setor com o slug da unidade
-            $data['description'] = $data['description'] . ' - ' . $unity_slug;
-
-            $this->entity->firstOrCreate(
-                [
-                    'description' => $data['description'],
-                    'slug' => $data['slug'],
-                    'unity_id' => $data['unity_id'],
-                ]
-            );
-
-            DB::commit();
-
-        } catch (\Throwable $th) {
-            DB::rollback();
-            throw $th;
-        }
+        DB::transaction(function () use ($data) {
+            $this->entity->firstOrCreate([
+                'description' => $data['description'],
+                'slug' => $data['slug'],
+                'unity_id' => $data['unity_id'],
+            ]);
+        });
     }
 
     public function update(object $entity, array $data): void
     {
-        $unity = Unity::where('id', $data['unity_id'])->first();
+        $this->assertUnity((int) $data['unity_id']);
 
-        if (!$unity) {
-            throw new \Exception('Unidade não encontrada para o setor.');
-        }
-        $unity_slug = $unity->slug ?? null;
-
-        try {
-            DB::beginTransaction();
-
-            // Concatenar a description do setor com o slug da unidade
-            $data['description'] = $data['description'] . ' - ' . $unity_slug;
-
+        DB::transaction(function () use ($entity, $data) {
             $entity->update($data);
-
-            DB::commit();
-
-        } catch (\Throwable $th) {
-            DB::rollback();
-            throw $th;
-        }
+        });
     }
 
     public function filter(array $filters)
     {
-        // query que mostra os registros que foram deletados
-        $query = $this->entity->with('unity');
+        $query = $this->entity->newQuery()->withTrashed()->with('unity');
 
-        if (isset($filters['description'])) {
-            $query->where('description', 'like', '%' . $filters['description'] . '%');
+        if (filled($filters['description'] ?? null)) {
+            $query->where('description', 'like', '%'.$filters['description'].'%');
         }
 
-        if (isset($filters['slug'])) {
-            $query->where('slug', 'like', '%' . $filters['slug'] . '%');
+        if (filled($filters['slug'] ?? null)) {
+            $query->where('slug', 'like', '%'.$filters['slug'].'%');
         }
 
-        if (isset($filters['unity_id'])) {
+        if (filled($filters['unity_id'] ?? null)) {
             $query->where('unity_id', $filters['unity_id']);
         }
 
-        return $query->withTrashed()->paginate();
+        return $query->paginate();
     }
 
     public function destroy(object $entity): void

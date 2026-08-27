@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 class UserRepository extends BaseRepository
 {
     private $entity;
+
     public function __construct(User $entity)
     {
         parent::__construct($entity);
@@ -19,7 +20,9 @@ class UserRepository extends BaseRepository
 
     public function getAll(): Collection
     {
-        return $this->entity->withTrashed()->get();
+        return $this->entity->withTrashed()
+            ->with(['profile.abilitys', 'unity', 'sector', 'expertiseAreas'])
+            ->get();
     }
 
     public function findById(int $id): object
@@ -34,12 +37,23 @@ class UserRepository extends BaseRepository
 
     public function updatePassword(string $email, string $password): void
     {
-        $this->entity::where('email', $email)->update(['password' => Hash::make($password)]);
+        $user = $this->entity->newQuery()->whereRaw('LOWER(email) = ?', [mb_strtolower($email)])->first();
+
+        if (! $user) {
+            return;
+        }
+
+        $user->update(['password' => $password]); // mutator faz o hash
+        $user->tokens()->delete();                // invalida sessões após troca de senha
     }
 
     public function paginate(int $totalPage): LengthAwarePaginator
     {
-        return $this->entity->orderBy('users.name')->withTrashed()->with('profile')->paginate($totalPage);
+        return $this->entity
+            ->orderBy('users.name')
+            ->withTrashed()
+            ->with(['profile.abilitys', 'unity', 'sector', 'expertiseAreas'])
+            ->paginate($totalPage);
     }
 
     public function getUserAbilities(int $id)
