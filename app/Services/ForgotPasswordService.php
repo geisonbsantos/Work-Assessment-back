@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\CodeException;
 use App\Mail\ForgotPasswordMail;
+use App\Models\ResetPassword;
 use App\Repositories\Contracts\ForgotPasswordInterface;
 use App\Repositories\Core\PasswordResetRepository;
 use Carbon\Carbon;
@@ -12,55 +13,62 @@ use Illuminate\Support\Str;
 
 class ForgotPasswordService implements ForgotPasswordInterface
 {
-    private PasswordResetRepository $repository;
-    private UserService $userService;
+    /** Minutos de validade do token de redefinição. */
+    public const TOKEN_TTL_MIN = 30;
 
     public function __construct(
-        PasswordResetRepository $repository,
-        UserService $userService
-    ) {
-        $this->repository = $repository;
-        $this->userService = $userService;
-    }
+        private PasswordResetRepository $repository,
+        private UserService $userService,
+    ) {}
 
     public function sendEmail(array $request): void
     {
-        $data = [
-            'email' => $request['email'],
-            'token' => Str::random(5),
-            'created_at' => Carbon::now(),
-        ];
-        $this->repository->store($data);
+        $email = mb_strtolower(trim($request['email']));
+        $user = $this->userService->findWhereFirst('email', $email);
 
-        $email = $this->userService->findWhereFirst('email', $request['email']);
-
-        if ($email) {
-            Mail::to($data['email'])->send(new ForgotPasswordMail($data));
+        // Não revela se o e-mail existe; só age se existir.
+        if (! $user) {
+            return;
         }
+
+        // Invalida pedidos anteriores do mesmo e-mail.
+        ResetPassword::where('email', $email)->delete();
+
+        $token = Str::upper(Str::random(8));
+        ResetPassword::create(['email' => $email, 'token' => $token]);
+
+        Mail::to($email)->queue(new ForgotPasswordMail(['email' => $email, 'token' => $token]));
     }
 
-    public function findWhereTokenAndEmail(array $request)
+    private function findValidRegister(array $request): ResetPassword
     {
-        if ($this->repository->findWhereTokenAndEmail($request['token'], $request['email']) == null) {
+        $register = $this->repository->findWhereTokenAndEmail(
+            $request['token'],
+            mb_strtolower(trim($request['email'])),
+        );
+
+        if (! $register) {
             throw new CodeException('O seu código é inválido!');
-        } else {
-            return $this->repository->findWhereTokenAndEmail($request['token'], $request['email']);
         }
+
+        if ($register->created_at?->lt(Carbon::now()->subMinutes(self::TOKEN_TTL_MIN))) {
+            $register->delete();
+            throw new CodeException('O seu código expirou. Solicite um novo.');
+        }
+
+        return $register;
     }
 
     public function validToken(array $request): void
     {
-        $register = $this->findWhereTokenAndEmail($request);
-        if (! $register) {
-            throw new CodeException($register);
-        }
+        $this->findValidRegister($request);
     }
 
     public function resetPassword(array $request): void
     {
-        $this->validToken($request);
-        $this->userService->updatePassword($request['email'], $request['password']);
-        $register = $this->findWhereTokenAndEmail($request);
+        $register = $this->findValidRegister($request);
+
+        $this->userService->updatePassword($register->email, $request['password']);
         $register->delete();
     }
 }

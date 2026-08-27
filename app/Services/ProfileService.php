@@ -48,7 +48,15 @@ class ProfileService implements ProfileInterface
 
     public function destroy(int $id): void
     {
-        $profile = $this->findById($id);
+        $profile = Profile::withCount('users')->findOrFail($id);
+
+        if ($profile->users_count > 0) {
+            throw new \App\Exceptions\UserException(
+                'Não é possível excluir um perfil com usuários vinculados.',
+                409
+            );
+        }
+
         $this->repository->destroy($profile);
     }
 

@@ -9,18 +9,19 @@ use App\Http\Resources\UserResource;
 use App\Mail\AccountCreateMail;
 use App\Repositories\Contracts\UserInterface;
 use App\Repositories\Core\UserRepository;
+use App\Traits\CustomUserLogTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
-use App\Traits\CustomUserLogTrait;
 
 class UserService implements UserInterface
 {
     use CustomUserLogTrait;
 
     private $repository;
+
     public function __construct(
         UserRepository $repository
     ) {
@@ -54,35 +55,36 @@ class UserService implements UserInterface
 
     public function store(array $data): void
     {
-        $data['password'] = Str::random(10);
+        $senha = Str::password(12);
+        $data['password'] = $senha;
 
         $this->repository->store($data);
 
         $this->createCustomUserLog('Criou um novo usuário.');
 
-        // Mail::to($data['email'])->send(new AccountCreateMail($data));
+        Mail::to($data['email'])->queue(new AccountCreateMail(['password' => $senha] + $data));
     }
 
     public function update(array $request, int $id): void
     {
         $user = $this->findById($id);
         $this->repository->update($user, $request);
-        $this->createCustomUserLog('Editou um usuário cpf: ' . $user->cpf . '.');
+        $this->createCustomUserLog('Editou um usuário cpf: '.$user->cpf.'.');
     }
 
     public function destroy(int $id): void
     {
         $user = $this->findById($id);
-        $this->createCustomUserLog('Deletou um usuário cpf: ' . $user->cpf . '.');
+        $this->createCustomUserLog('Deletou um usuário cpf: '.$user->cpf.'.');
         $this->repository->destroy($user);
         $user->tokens()->delete();
     }
 
     public function login(object $request): string
     {
-        $user = $this->repository->findWhereFirst('cpf', $request->cpf);
+        $user = $this->repository->findWhereFirst('cpf', \App\Models\User::normalizeCpf($request->cpf));
 
-        if (! $user) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw new CredentialsException($user);
         }
 
@@ -90,14 +92,15 @@ class UserService implements UserInterface
             throw new UserException('Usuário desativado! Favor entrar em contato com a Administração.');
         }
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw new CredentialsException($user);
-        }
         $user->tokens()->delete();
 
-        $abilities = $user->profile->abilities->pluck('slug')->toArray();
+        $abilities = $user->profile?->abilities->pluck('slug')->toArray() ?? [];
 
-        return $user->createToken('AccessToken', $abilities, now()->addMinutes(480))->plainTextToken;
+        return $user->createToken(
+            'AccessToken',
+            $abilities,
+            now()->addMinutes((int) config('sanctum.expiration', 480))
+        )->plainTextToken;
     }
 
     public function loggedInUser($request): UserResource
@@ -109,9 +112,25 @@ class UserService implements UserInterface
 
     public function logout($request): void
     {
-        $personalAccessToken = new PersonalAccessToken;
-        $token = substr($request->headers->get('authorization'), 7);
-        $personalAccessToken->findToken($token)->delete();
+        $user = $request->user();
+        $current = $user?->currentAccessToken();
+
+        if ($current instanceof PersonalAccessToken) {
+            $current->delete();
+
+            return;
+        }
+
+        $plain = $request->bearerToken();
+        $token = $plain ? PersonalAccessToken::findToken($plain) : null;
+
+        if ($token) {
+            $token->delete();
+
+            return;
+        }
+
+        $user?->tokens()->delete();
     }
 
     public function updatePassword(string $email, string $password): void
@@ -129,5 +148,25 @@ class UserService implements UserInterface
     public function restore(int $id): void
     {
         $this->repository->restore($id);
+    }
+
+    /**
+     * Valida CPF + senha e devolve o usuário. Somente leitura — a seleção de
+     * lotação (profile/unity/sector) será tratada num endpoint autenticado
+     * próprio (ver WIP — Lotação e validCredentials / RPI-0005).
+     */
+    public function validCredentials(object $request): UserResource
+    {
+        $user = $this->repository->findWhereFirst('cpf', \App\Models\User::normalizeCpf($request->cpf));
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            throw new CredentialsException($user);
+        }
+
+        if ($user->deleted_at != null) {
+            throw new UserException('Usuário desativado! Favor entrar em contato com a Administração.');
+        }
+
+        return new UserResource($user);
     }
 }
