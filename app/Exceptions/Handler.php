@@ -2,12 +2,18 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Throwable;
 use Yajra\Pdo\Oci8\Exceptions\Oci8Exception;
 
@@ -47,21 +53,37 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $exception)
     {
-        // Exceptions especificas com tratamento especial
-        $response = $this->handlerSpecialExceptions($exception);
+        return $this->handlerSpecialExceptions($exception)
+            ?? $this->handlerGenericExceptions($exception)
+            ?? parent::render($request, $exception);
+    }
 
-        // Exceptions genéricas
-        if (! $response) {
-            $response = $this->handlerGenericExceptions($exception);
-        }
-
-        return $response;
+    /**
+     * `details` só com a mensagem interna quando APP_DEBUG=true — nunca em produção.
+     */
+    private function debug(Throwable $e): array
+    {
+        return config('app.debug') ? ['details' => $e->getMessage()] : [];
     }
 
     protected function handlerSpecialExceptions(Throwable $e)
     {
-        if ($e instanceof \Illuminate\Auth\AuthenticationException) {
-            return response()->json(['error' => $e->getMessage()], 401);
+        // FormRequest::failedValidation lança isso com a resposta 422 pronta.
+        if ($e instanceof HttpResponseException) {
+            return $e->getResponse();
+        }
+
+        if ($e instanceof AuthenticationException) {
+            return response()->json(['error' => 'Não autenticado.'], 401);
+        }
+
+        // Sanctum MissingAbilityException estende AuthorizationException.
+        if ($e instanceof AuthorizationException) {
+            return response()->json(['error' => 'Acesso negado.', 'details' => 'Você não tem permissão para esta ação.'], 403);
+        }
+
+        if ($e instanceof ThrottleRequestsException || $e instanceof TooManyRequestsHttpException) {
+            return response()->json(['error' => 'Muitas requisições. Tente novamente em instantes.'], 429);
         }
 
         if ($e instanceof CredentialsException) {
@@ -73,52 +95,44 @@ class Handler extends ExceptionHandler
         }
 
         if ($e instanceof UserException) {
-            return response()->json(['error' => 'Código inválido.', 'details' => $e->getMessage()], 422);
+            return response()->json(['error' => $e->getMessage()], $e->statusCode ?? 422);
         }
 
         if ($e instanceof ModelNotFoundException) {
-            return response()->json(['error' => 'Recurso não encontrado.', 'details' => $e->getMessage()], 404);
+            return response()->json(['error' => 'Recurso não encontrado.'], 404);
         }
 
         if ($e instanceof ValidationException) {
-            return $e->response;
+            return $e->response
+                ?? response()->json(['error' => 'Erro no envio de dados.', 'details' => $e->errors()], $e->status);
         }
 
-        if ($e instanceof QueryException) {
-            if (strpos($e->getMessage(), 'not-null') !== false) {
-                return response()->json(['error' => 'Todos os campos obrigatórios devem ser preenchidos.', 'details' => $e->getMessage()], 400);
-            }
-
-            if (strpos($e->getMessage(), 'foreign key') !== false) {
-                return response()->json(['error' => 'Não foi possível remover o registro pois ele possui outros relacionamentos.', 'details' => $e->getMessage()], 400);
-            }
-
-            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                return response()->json(['error' => 'Já existe um recurso com essas informações.', 'details' => $e->getMessage()], 400);
-            }
-
-            if (strpos($e->getMessage(), 'restrição exclusiva') !== false) {
-                return response()->json(['error' => 'Já existe um recurso com essas informações.', 'details' => $e->getMessage()], 405);
-            } else {
-                return response()->json(['error' => 'Exceção de consulta', 'details' => $e->getMessage()], 400);
-            }
+        if ($e instanceof QueryException || $e instanceof Oci8Exception) {
+            return $this->handlerDatabaseException($e);
         }
 
-        if ($e instanceof Oci8Exception) {
-            if (strpos($e->getMessage(), 'not-null') !== false) {
-                return response()->json(['error' => 'Todos os campos obrigatórios devem ser preenchidos.', 'details' => $e->getMessage()], 400);
-            }
+        return null;
+    }
 
-            if (strpos($e->getMessage(), 'unique constraint') !== false) {
-                return response()->json(['error' => 'Já existe um recurso com essas informações.', 'details' => $e->getMessage()], 400);
-            }
+    protected function handlerDatabaseException(Throwable $e)
+    {
+        $msg = $e->getMessage();
 
-            if (strpos($e->getMessage(), 'restrição exclusiva') !== false) {
-                return response()->json(['error' => 'Já existe um recurso com essas informações.', 'details' => $e->getMessage()], 405);
-            } else {
-                return response()->json(['error' => 'Exceção de Oci8', 'details' => $e->getMessage()], 400);
-            }
+        if (str_contains($msg, 'not-null') || str_contains($msg, 'NOT NULL')) {
+            return response()->json(['error' => 'Todos os campos obrigatórios devem ser preenchidos.'], 400);
         }
+
+        if (str_contains($msg, 'foreign key') || str_contains($msg, 'FOREIGN KEY')) {
+            return response()->json(['error' => 'Não foi possível concluir: o registro possui outros vínculos.'], 409);
+        }
+
+        if (str_contains($msg, 'Duplicate entry') || str_contains($msg, 'UNIQUE') || str_contains($msg, 'unique constraint') || str_contains($msg, 'restrição exclusiva')) {
+            return response()->json(['error' => 'Já existe um recurso com essas informações.'], 409);
+        }
+
+        report($e);
+
+        return response()->json(array_merge(['error' => 'Erro ao acessar os dados.'], $this->debug($e)), 400);
     }
 
     protected function handlerGenericExceptions(Throwable $e)
@@ -126,11 +140,17 @@ class Handler extends ExceptionHandler
         if ($e instanceof NotFoundHttpException) {
             return response()->json(['error' => 'Rota não encontrada!'], 404);
         }
+
         if ($e instanceof MethodNotAllowedHttpException) {
             return response()->json(['error' => 'Método não permitido!'], $e->getStatusCode());
         }
-        if ($e instanceof \Exception) {
-            return response()->json(['error' => 'Ocorreu um erro.', 'details' => $e->getMessage()], 500);
+
+        if ($e instanceof HttpExceptionInterface) {
+            return response()->json(['error' => $e->getMessage() ?: 'Erro na requisição.'], $e->getStatusCode());
         }
+
+        report($e);
+
+        return response()->json(array_merge(['error' => 'Ocorreu um erro.'], $this->debug($e)), 500);
     }
 }
